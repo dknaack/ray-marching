@@ -37,17 +37,17 @@ typedef union {
 } v2;
 
 typedef union {
-    struct { f32 x, y, z; };
-    f32 e[3];
+	struct { f32 x, y, z; };
+	f32 e[3];
 } v3;
 
 typedef struct {
-    f32 e[4][4];
+	f32 e[4][4];
 } m4x4;
 
 typedef struct {
-    char *at;
-    usize length;
+	char *at;
+	usize length;
 } string;
 
 typedef struct {
@@ -75,69 +75,69 @@ make_v2(f32 x, f32 y)
 static v3
 make_v3(f32 x, f32 y, f32 z)
 {
-    v3 result;
-    result.x = x;
-    result.y = y;
-    result.z = z;
-    return result;
+	v3 result;
+	result.x = x;
+	result.y = y;
+	result.z = z;
+	return result;
 }
 
 static v3
 add3(v3 a, v3 b)
 {
-    v3 result;
-    result.x = a.x + b.x;
-    result.y = a.y + b.y;
-    result.z = a.z + b.z;
-    return result;
+	v3 result;
+	result.x = a.x + b.x;
+	result.y = a.y + b.y;
+	result.z = a.z + b.z;
+	return result;
 }
 
 static v3
 sub3(v3 a, v3 b)
 {
-    v3 result;
-    result.x = a.x - b.x;
-    result.y = a.y - b.y;
-    result.z = a.z - b.z;
-    return result;
+	v3 result;
+	result.x = a.x - b.x;
+	result.y = a.y - b.y;
+	result.z = a.z - b.z;
+	return result;
 }
 
 static v3
 mulf3(v3 a, f32 b)
 {
-    v3 result;
-    result.x = a.x * b;
-    result.y = a.y * b;
-    result.z = a.z * b;
-    return result;
+	v3 result;
+	result.x = a.x * b;
+	result.y = a.y * b;
+	result.z = a.z * b;
+	return result;
 }
 
 static f32
 dot3(v3 a, v3 b)
 {
-    f32 result = a.x * b.x + a.y * b.y + a.z * b.z;
-    return result;
+	f32 result = a.x * b.x + a.y * b.y + a.z * b.z;
+	return result;
 }
 
 static v3
 normalize3(v3 a)
 {
-    v3 result;
-    f32 length = sqrtf(dot3(a, a));
-    result.x = a.x / length;
-    result.y = a.y / length;
-    result.z = a.z / length;
-    return result;
+	v3 result;
+	f32 length = sqrtf(dot3(a, a));
+	result.x = a.x / length;
+	result.y = a.y / length;
+	result.z = a.z / length;
+	return result;
 }
 
 static v3
 cross(v3 a, v3 b)
 {
-    v3 result;
-    result.x = a.y * b.z - a.z * b.y;
-    result.y = a.z * b.x - a.x * b.z;
-    result.z = a.x * b.y - a.y * b.x;
-    return result;
+	v3 result;
+	result.x = a.y * b.z - a.z * b.y;
+	result.y = a.z * b.x - a.x * b.z;
+	result.z = a.x * b.y - a.y * b.x;
+	return result;
 }
 
 // NOTE: This transform a vector in world space to view space.
@@ -189,19 +189,19 @@ alloc(arena *arena, size_t size, size_t count)
 static string
 read_file(char *filename, arena *arena)
 {
-    string result = {0};
-    FILE *file = fopen(filename, "r");
-    if (file) {
-        fseek(file, 0, SEEK_END);
-        result.length = ftell(file);
-        fseek(file, 0, SEEK_SET);
+	string result = {0};
+	FILE *file = fopen(filename, "r");
+	if (file) {
+		fseek(file, 0, SEEK_END);
+		result.length = ftell(file);
+		fseek(file, 0, SEEK_SET);
 
-        result.at = ALLOC(arena, result.length + 1, char);
-        result.at[result.length] = 0;
-        fread(result.at, 1, result.length, file);
-    }
+		result.at = ALLOC(arena, result.length + 1, char);
+		result.at[result.length] = 0;
+		fread(result.at, 1, result.length, file);
+	}
 
-    return result;
+	return result;
 }
 
 static GLuint
@@ -275,43 +275,43 @@ static GLuint program;
 static void
 gl_uniform_v2(GLint program, char *name, v2 value)
 {
-    GLint location = glGetUniformLocation(program, name);
-    glUniform2f(location, value.x, value.y);
+	GLint location = glGetUniformLocation(program, name);
+	glUniform2f(location, value.x, value.y);
 }
 
 static void
 framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0, 0, width, height);
-    gl_uniform_v2(program, "size", make_v2(width, height));
+	glViewport(0, 0, width, height);
+	gl_uniform_v2(program, "size", make_v2(width, height));
 }
 
 static v2
 get_mouse_pos(GLFWwindow *window)
 {
-    f64 x, y;
-    glfwGetCursorPos(window, &x, &y);
+	f64 x, y;
+	glfwGetCursorPos(window, &x, &y);
 
-    v2 result = make_v2(x, y);
-    return result;
+	v2 result = make_v2(x, y);
+	return result;
 }
 
 int main(void)
 {
-    if (!glfwInit()) {
+	if (!glfwInit()) {
 		return -1;
 	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow *window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        return -1;
-    }
+	GLFWwindow *window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	if (!window) {
+		glfwTerminate();
+		return -1;
+	}
 
-    glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent(window);
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -326,15 +326,15 @@ int main(void)
 	glUseProgram(program);
 
 	f32 vertices[] = {
-        // first triangle
-         1.0f,  1.0f, 0.0f,  // top right
-         1.0f, -1.0f, 0.0f,  // bottom right
-        -1.0f,  1.0f, 0.0f,  // top left
-        // second triangle
-         1.0f, -1.0f, 0.0f,  // bottom right
-        -1.0f, -1.0f, 0.0f,  // bottom left
-        -1.0f,  1.0f, 0.0f   // top left
-    };
+		// first triangle
+		1.0f,  1.0f, 0.0f,  // top right
+		1.0f, -1.0f, 0.0f,  // bottom right
+		-1.0f,  1.0f, 0.0f,  // top left
+							 // second triangle
+		1.0f, -1.0f, 0.0f,  // bottom right
+		-1.0f, -1.0f, 0.0f,  // bottom left
+		-1.0f,  1.0f, 0.0f   // top left
+	};
 
 	GLuint vao, vbo;
 	glGenVertexArrays(1, &vao);
@@ -347,69 +347,69 @@ int main(void)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
 	glEnableVertexAttribArray(0);
 
-    v3 camera_pos = make_v3(0, 0, 5);
+	v3 camera_pos = make_v3(0, 0, 5);
 	v2 prev_mouse_pos = get_mouse_pos(window);
 	f32 pitch = 0;
 	f32 yaw = 0;
 
-    /* Loop until the user closes the window */
-    f32 prev_time = glfwGetTime();
-    while (!glfwWindowShouldClose(window)) {
-        f32 time = glfwGetTime();
-        f32 dt = time - prev_time;
+	/* Loop until the user closes the window */
+	f32 prev_time = glfwGetTime();
+	while (!glfwWindowShouldClose(window)) {
+		f32 time = glfwGetTime();
+		f32 dt = time - prev_time;
 
-        // Update the camera
-        v2 mouse_pos = get_mouse_pos(window);
-        f32 sensitivity = 0.4f;
-        yaw   += (mouse_pos.x - prev_mouse_pos.x) * sensitivity;
-        pitch -= (mouse_pos.y - prev_mouse_pos.y) * sensitivity;
-        if (pitch < -89.0f) {
-            pitch = -89.0f;
-        } else if (pitch > 10.1f) {
-            pitch = 10.1f;
-        }
+		// Update the camera
+		v2 mouse_pos = get_mouse_pos(window);
+		f32 sensitivity = 0.4f;
+		yaw   += (mouse_pos.x - prev_mouse_pos.x) * sensitivity;
+		pitch -= (mouse_pos.y - prev_mouse_pos.y) * sensitivity;
+		if (pitch < -89.0f) {
+			pitch = -89.0f;
+		} else if (pitch > 10.1f) {
+			pitch = 10.1f;
+		}
 
 		// Get the camera direction
-        v3 camera_dir;
-        camera_dir.x = cos(radians(yaw)) * cos(radians(pitch));
-        camera_dir.y = sin(radians(pitch));
-        camera_dir.z = sin(radians(yaw)) * cos(radians(pitch));
-        camera_dir = normalize3(camera_dir);
+		v3 camera_dir;
+		camera_dir.x = cos(radians(yaw)) * cos(radians(pitch));
+		camera_dir.y = sin(radians(pitch));
+		camera_dir.z = sin(radians(yaw)) * cos(radians(pitch));
+		camera_dir = normalize3(camera_dir);
 
-        // Update the camera position
-        f32 speed = 10.0f * dt;
-        v3 camera_right = cross(make_v3(0, 1, 0), camera_dir);
-        if (glfwGetKey(window, GLFW_KEY_W)) {
-            camera_pos = add3(camera_pos, mulf3(camera_dir, speed));
-        }
+		// Update the camera position
+		f32 speed = 10.0f * dt;
+		v3 camera_right = cross(make_v3(0, 1, 0), camera_dir);
+		if (glfwGetKey(window, GLFW_KEY_W)) {
+			camera_pos = add3(camera_pos, mulf3(camera_dir, speed));
+		}
 
-        if (glfwGetKey(window, GLFW_KEY_A)) {
-            camera_pos = add3(camera_pos, mulf3(camera_right, speed));
-        }
+		if (glfwGetKey(window, GLFW_KEY_A)) {
+			camera_pos = add3(camera_pos, mulf3(camera_right, speed));
+		}
 
-        if (glfwGetKey(window, GLFW_KEY_S)) {
-            camera_pos = sub3(camera_pos, mulf3(camera_dir, speed));
-        }
+		if (glfwGetKey(window, GLFW_KEY_S)) {
+			camera_pos = sub3(camera_pos, mulf3(camera_dir, speed));
+		}
 
-        if (glfwGetKey(window, GLFW_KEY_D)) {
-            camera_pos = sub3(camera_pos, mulf3(camera_right, speed));
-        }
+		if (glfwGetKey(window, GLFW_KEY_D)) {
+			camera_pos = sub3(camera_pos, mulf3(camera_right, speed));
+		}
 
-        // Get the view matrix
-        m4x4 view = look_at(camera_pos, add3(camera_pos, camera_dir), make_v3(0, 1, 0));
-        glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, (f32 *)view.e);
+		// Get the view matrix
+		m4x4 view = look_at(camera_pos, add3(camera_pos, camera_dir), make_v3(0, 1, 0));
+		glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, (f32 *)view.e);
 
-        glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glUniform1f(glGetUniformLocation(program, "time"), time);
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-        prev_mouse_pos = mouse_pos;
-        prev_time = time;
-    }
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+		prev_mouse_pos = mouse_pos;
+		prev_time = time;
+	}
 
-    glfwTerminate();
+	glfwTerminate();
 	free(arena);
-    return 0;
+	return 0;
 }
