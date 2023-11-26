@@ -286,7 +286,7 @@ framebuffer_size_callback(GLFWwindow* window, int width, int height)
     gl_uniform_v2(program, "size", make_v2(width, height));
 }
 
-static v2 
+static v2
 get_mouse_pos(GLFWwindow *window)
 {
     f64 x, y;
@@ -321,7 +321,7 @@ int main(void)
 		"void main(void) {\n"
 		"	gl_Position = v4(pos, 1);\n"
 		"}\n";
-	string fs_src = read_file("shader.glsl", arena);
+	string fs_src = read_file("main.glsl", arena);
 	program = gl_program_create(vs_src, fs_src.at);
 	glUseProgram(program);
 
@@ -329,12 +329,12 @@ int main(void)
         // first triangle
          1.0f,  1.0f, 0.0f,  // top right
          1.0f, -1.0f, 0.0f,  // bottom right
-        -1.0f,  1.0f, 0.0f,  // top left 
+        -1.0f,  1.0f, 0.0f,  // top left
         // second triangle
          1.0f, -1.0f, 0.0f,  // bottom right
         -1.0f, -1.0f, 0.0f,  // bottom left
         -1.0f,  1.0f, 0.0f   // top left
-    }; 
+    };
 
 	GLuint vao, vbo;
 	glGenVertexArrays(1, &vao);
@@ -384,7 +384,7 @@ int main(void)
         }
 
         if (glfwGetKey(window, GLFW_KEY_A)) {
-            camera_pos = sub3(camera_pos, mulf3(camera_right, speed));
+            camera_pos = add3(camera_pos, mulf3(camera_right, speed));
         }
 
         if (glfwGetKey(window, GLFW_KEY_S)) {
@@ -392,7 +392,7 @@ int main(void)
         }
 
         if (glfwGetKey(window, GLFW_KEY_D)) {
-            camera_pos = add3(camera_pos, mulf3(camera_right, speed));
+            camera_pos = sub3(camera_pos, mulf3(camera_right, speed));
         }
 
         // Get the view matrix
