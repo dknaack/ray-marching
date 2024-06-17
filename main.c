@@ -10,7 +10,6 @@
 #include "glad/glad.c"
 
 #define ASSERT(expr) ((expr) ? (void)0 : (void)(*(volatile int *)0 = 0))
-#define ALLOC(arena, count, type) ((type *)alloc(arena, count, sizeof(type)))
 
 #define MAX_POINT_COUNT 1024
 #define F32_PI 3.14159265358979323846f
@@ -49,12 +48,6 @@ typedef struct {
 	char *at;
 	usize length;
 } string;
-
-typedef struct {
-	char *data;
-	usize pos;
-	usize size;
-} arena;
 
 static f32
 radians(f32 degrees)
@@ -168,26 +161,8 @@ look_at(v3 eye, v3 center, v3 up)
 	return result;
 }
 
-static arena *
-new_arena(size_t size)
-{
-	arena *arena = calloc(size + sizeof(*arena), 1);
-	arena->data = (char *)(arena + 1);
-	arena->size = size;
-	return arena;
-}
-
-static void *
-alloc(arena *arena, size_t size, size_t count)
-{
-	ASSERT(arena->pos < arena->size);
-	void *result = arena->data + arena->pos;
-	arena->pos += size * count;
-	return result;
-}
-
 static string
-read_file(char *filename, arena *arena)
+read_file(char *filename)
 {
 	string result = {0};
 	FILE *file = fopen(filename, "r");
@@ -196,7 +171,7 @@ read_file(char *filename, arena *arena)
 		result.length = ftell(file);
 		fseek(file, 0, SEEK_SET);
 
-		result.at = ALLOC(arena, result.length + 1, char);
+		result.at = calloc(result.length + 1, 1);
 		result.at[result.length] = 0;
 		fread(result.at, 1, result.length, file);
 	}
@@ -315,15 +290,15 @@ int main(void)
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	arena *arena = new_arena(1024 * 1024);
 	char *vs_src =
 		"layout (location = 0) in v3 pos;\n"
 		"void main(void) {\n"
 		"	gl_Position = v4(pos, 1);\n"
 		"}\n";
-	string fs_src = read_file("main.glsl", arena);
+	string fs_src = read_file("main.glsl");
 	program = gl_program_create(vs_src, fs_src.at);
 	glUseProgram(program);
+	free(fs_src.at);
 
 	f32 vertices[] = {
 		// first triangle
@@ -410,6 +385,5 @@ int main(void)
 	}
 
 	glfwTerminate();
-	free(arena);
 	return 0;
 }
