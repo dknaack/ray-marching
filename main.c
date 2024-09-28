@@ -10,7 +10,6 @@
 
 #include "glad/glad.c"
 
-#define MAX_POINT_COUNT 1024
 #define FLOAT_PI 3.14159265358979323846f
 
 typedef union {
