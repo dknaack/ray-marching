@@ -1,3 +1,4 @@
+#include <assert.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -9,124 +10,106 @@
 
 #include "glad/glad.c"
 
-#define ASSERT(expr) ((expr) ? (void)0 : (void)(*(volatile int *)0 = 0))
-
 #define MAX_POINT_COUNT 1024
-#define F32_PI 3.14159265358979323846f
-
-typedef uintptr_t usize;
-typedef uint64_t  u64;
-typedef uint32_t  u32;
-typedef uint16_t  u16;
-typedef uint8_t   u8;
-
-typedef intptr_t isize;
-typedef int64_t  i64;
-typedef int32_t  i32;
-typedef int16_t  i16;
-typedef int8_t   i8;
-
-typedef double f64;
-typedef float  f32;
-typedef i32 b32;
+#define FLOAT_PI 3.14159265358979323846f
 
 typedef union {
-	struct { f32 x, y; };
-	f32 e[2];
-} v2;
+	struct { float x, y; };
+	float e[2];
+} vec2;
 
 typedef union {
-	struct { f32 x, y, z; };
-	f32 e[3];
-} v3;
+	struct { float x, y, z; };
+	float e[3];
+} vec3;
 
 typedef struct {
-	f32 e[4][4];
-} m4x4;
+	float e[4][4];
+} mat4;
 
 typedef struct {
 	char *at;
-	usize length;
+	size_t length;
 } string;
 
-static f32
-radians(f32 degrees)
+static float
+radians(float degrees)
 {
-	f32 result = F32_PI / 180.0f * degrees;
+	float result = FLOAT_PI / 180.0f * degrees;
 	return result;
 }
 
-static v2
-make_v2(f32 x, f32 y)
+static vec2
+make_vec2(float x, float y)
 {
-	v2 result;
+	vec2 result;
 	result.x = x;
 	result.y = y;
 	return result;
 }
 
-static v3
-make_v3(f32 x, f32 y, f32 z)
+static vec3
+make_vec3(float x, float y, float z)
 {
-	v3 result;
+	vec3 result;
 	result.x = x;
 	result.y = y;
 	result.z = z;
 	return result;
 }
 
-static v3
-add3(v3 a, v3 b)
+static vec3
+add3(vec3 a, vec3 b)
 {
-	v3 result;
+	vec3 result;
 	result.x = a.x + b.x;
 	result.y = a.y + b.y;
 	result.z = a.z + b.z;
 	return result;
 }
 
-static v3
-sub3(v3 a, v3 b)
+static vec3
+sub3(vec3 a, vec3 b)
 {
-	v3 result;
+	vec3 result;
 	result.x = a.x - b.x;
 	result.y = a.y - b.y;
 	result.z = a.z - b.z;
 	return result;
 }
 
-static v3
-mulf3(v3 a, f32 b)
+static vec3
+mulf3(vec3 a, float b)
 {
-	v3 result;
+	vec3 result;
 	result.x = a.x * b;
 	result.y = a.y * b;
 	result.z = a.z * b;
 	return result;
 }
 
-static f32
-dot3(v3 a, v3 b)
+static float
+dot3(vec3 a, vec3 b)
 {
-	f32 result = a.x * b.x + a.y * b.y + a.z * b.z;
+	float result = a.x * b.x + a.y * b.y + a.z * b.z;
 	return result;
 }
 
-static v3
-normalize3(v3 a)
+static vec3
+normalize3(vec3 a)
 {
-	v3 result;
-	f32 length = sqrtf(dot3(a, a));
+	vec3 result;
+	float length = sqrtf(dot3(a, a));
 	result.x = a.x / length;
 	result.y = a.y / length;
 	result.z = a.z / length;
 	return result;
 }
 
-static v3
-cross(v3 a, v3 b)
+static vec3
+cross(vec3 a, vec3 b)
 {
-	v3 result;
+	vec3 result;
 	result.x = a.y * b.z - a.z * b.y;
 	result.y = a.z * b.x - a.x * b.z;
 	result.z = a.x * b.y - a.y * b.x;
@@ -134,14 +117,14 @@ cross(v3 a, v3 b)
 }
 
 // NOTE: This transform a vector in world space to view space.
-static m4x4
-look_at(v3 eye, v3 center, v3 up)
+static mat4
+look_at(vec3 eye, vec3 center, vec3 up)
 {
-	v3 f = normalize3(sub3(center, eye));
-	v3 s = normalize3(cross(f, up));
-	v3 u = cross(s, f);
+	vec3 f = normalize3(sub3(center, eye));
+	vec3 s = normalize3(cross(f, up));
+	vec3 u = cross(s, f);
 
-	m4x4 result = {0};
+	mat4 result = {0};
 	result.e[0][0] = s.x;
 	result.e[0][1] = s.y;
 	result.e[0][2] = s.z;
@@ -184,19 +167,10 @@ gl_shader_create(char *src, GLenum type)
 {
 	GLuint shader = glCreateShader(type);
 
-	const char *strings[3];
-	strings[0] = "#version 330\n";
-	strings[1] =
-		"#define v2 vec2\n"
-		"#define v3 vec3\n"
-		"#define v4 vec4\n"
-		"#define m4x4 mat4\n"
-		"#define f32 float\n"
-		"#define u32 uint\n"
-		"#define i32 int\n";
-	strings[2] = src;
+	const char *strings[1];
+	strings[0] = src;
 
-	glShaderSource(shader, 3, strings, NULL);
+	glShaderSource(shader, 1, strings, NULL);
 	glCompileShader(shader);
 
 	int success;
@@ -215,14 +189,14 @@ gl_program_create(char *vs, char *fs)
 {
 	GLuint vertex_shader = gl_shader_create(vs, GL_VERTEX_SHADER);
 	if (!vertex_shader) {
-		ASSERT(!"Invalid vertex shader");
+		assert(!"Invalid vertex shader");
 		return 0;
 	}
 
 	GLuint fragment_shader = gl_shader_create(fs, GL_FRAGMENT_SHADER);
 	if (!fragment_shader) {
 		glDeleteShader(vertex_shader);
-		ASSERT(!"Invalid fragment shader");
+		assert(!"Invalid fragment shader");
 		return 0;
 	}
 
@@ -248,7 +222,7 @@ gl_program_create(char *vs, char *fs)
 static GLuint program;
 
 static void
-gl_uniform_v2(GLint program, char *name, v2 value)
+gl_uniform_vec2(GLint program, char *name, vec2 value)
 {
 	GLint location = glGetUniformLocation(program, name);
 	glUniform2f(location, value.x, value.y);
@@ -258,16 +232,16 @@ static void
 framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
-	gl_uniform_v2(program, "size", make_v2(width, height));
+	gl_uniform_vec2(program, "size", make_vec2(width, height));
 }
 
-static v2
+static vec2
 get_mouse_pos(GLFWwindow *window)
 {
-	f64 x, y;
+	double x, y;
 	glfwGetCursorPos(window, &x, &y);
 
-	v2 result = make_v2(x, y);
+	vec2 result = make_vec2(x, y);
 	return result;
 }
 
@@ -291,16 +265,17 @@ int main(void)
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	char *vs_src =
-		"layout (location = 0) in v3 pos;\n"
+		"#version 330 core\n"
+		"layout (location = 0) in vec3 pos;\n"
 		"void main(void) {\n"
-		"	gl_Position = v4(pos, 1);\n"
+		"	gl_Position = vec4(pos, 1);\n"
 		"}\n";
 	string fs_src = read_file("main.glsl");
 	program = gl_program_create(vs_src, fs_src.at);
 	glUseProgram(program);
 	free(fs_src.at);
 
-	f32 vertices[] = {
+	float vertices[] = {
 		// first triangle
 		1.0f,  1.0f, 0.0f,  // top right
 		1.0f, -1.0f, 0.0f,  // bottom right
@@ -322,20 +297,20 @@ int main(void)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
 	glEnableVertexAttribArray(0);
 
-	v3 camera_pos = make_v3(0, 0, 5);
-	v2 prev_mouse_pos = get_mouse_pos(window);
-	f32 pitch = 0;
-	f32 yaw = 0;
+	vec3 camera_pos = make_vec3(0, 0, 5);
+	vec2 prev_mouse_pos = get_mouse_pos(window);
+	float pitch = 0;
+	float yaw = 0;
 
 	/* Loop until the user closes the window */
-	f32 prev_time = glfwGetTime();
+	float prev_time = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
-		f32 time = glfwGetTime();
-		f32 dt = time - prev_time;
+		float time = glfwGetTime();
+		float dt = time - prev_time;
 
 		// Update the camera
-		v2 mouse_pos = get_mouse_pos(window);
-		f32 sensitivity = 0.4f;
+		vec2 mouse_pos = get_mouse_pos(window);
+		float sensitivity = 0.4f;
 		yaw   += (mouse_pos.x - prev_mouse_pos.x) * sensitivity;
 		pitch -= (mouse_pos.y - prev_mouse_pos.y) * sensitivity;
 		if (pitch < -89.0f) {
@@ -345,15 +320,15 @@ int main(void)
 		}
 
 		// Get the camera direction
-		v3 camera_dir;
+		vec3 camera_dir;
 		camera_dir.x = cos(radians(yaw)) * cos(radians(pitch));
 		camera_dir.y = sin(radians(pitch));
 		camera_dir.z = sin(radians(yaw)) * cos(radians(pitch));
 		camera_dir = normalize3(camera_dir);
 
 		// Update the camera position
-		f32 speed = 10.0f * dt;
-		v3 camera_right = cross(make_v3(0, 1, 0), camera_dir);
+		float speed = 10.0f * dt;
+		vec3 camera_right = cross(make_vec3(0, 1, 0), camera_dir);
 		if (glfwGetKey(window, GLFW_KEY_W)) {
 			camera_pos = add3(camera_pos, mulf3(camera_dir, speed));
 		}
@@ -371,8 +346,8 @@ int main(void)
 		}
 
 		// Get the view matrix
-		m4x4 view = look_at(camera_pos, add3(camera_pos, camera_dir), make_v3(0, 1, 0));
-		glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, (f32 *)view.e);
+		mat4 view = look_at(camera_pos, add3(camera_pos, camera_dir), make_vec3(0, 1, 0));
+		glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, (float *)view.e);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
